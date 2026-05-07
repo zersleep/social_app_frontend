@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:social_test/features/home/widgets/home_appbar.dart';
+
+import '../widgets/home_appbar.dart';
+import '../widgets/story_section.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -11,10 +13,12 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           children: [
 
-            /// CUSTOM APPBAR
+            /// APPBAR
             const HomeAppBar(),
 
-          ]
+            /// STORIES
+            const StorySection(),
+          ],
         ),
       ),
     );
