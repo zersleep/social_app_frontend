@@ -10,6 +10,10 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
+      backgroundColor:
+      const Color(0xFFFFFBF7),
+
       body: SafeArea(
         child: ListView(
           children: [
@@ -20,26 +24,79 @@ class HomeScreen extends StatelessWidget {
             /// STORIES
             const StorySection(),
 
+            Container(
+              width: double.infinity,
+              height: 1.2,
+
+              color: const Color(
+                0xFFE5E5E5,
+              ),
+            ),
+
             /// POSTS
             const PostCard(
-              profileImage: 'assets/images/story1.jpg',
-              username: 'Marvel Universe',
-              postImage: 'assets/images/post1.jpg',
-              caption: 'Welcome to Loki season 2 🔥',
+
+              profileImage:
+              'assets/images/story2.jpg',
+
+              username: 'iko',
+
+              subtitle: 'Cap Ferret',
+
+              hasStory: true,
+
+              postImages: [
+
+                'assets/images/post1.jpg',
+                'assets/images/post2.jpg',
+                'assets/images/post3.jpg',
+              ],
+
+              caption:
+              'Drove the old coastal road. Three rolls of film, no plan, kept getting lost on purpose.',
             ),
 
             const PostCard(
-              profileImage: 'assets/images/story2.jpg',
-              username: 'Old Structure',
-              postImage: 'assets/images/post2.jpg',
-              caption: 'Beautiful architecture 🏜️',
+
+              profileImage:
+              'assets/images/story3.jpg',
+
+              username: 'jules.h',
+
+              subtitle: 'Paris',
+
+              hasStory: true,
+
+              postImages: [
+
+                'assets/images/post4.jpg',
+                'assets/images/post5.jpg',
+              ],
+
+              caption:
+              'Somewhere between coffee shops, old books, and rainy streets.',
             ),
 
             const PostCard(
-              profileImage: 'assets/images/story3.jpg',
-              username: '_.brainn',
-              postImage: 'assets/images/post3.jpg',
-              caption: 'Beach vibes ⚽',
+
+              profileImage:
+              'assets/images/story4.jpg',
+
+              username: 'lev.p',
+
+              subtitle: 'Tokyo',
+
+              hasStory: false,
+
+              postImages: [
+
+                'assets/images/post6.jpg',
+                'assets/images/post7.jpg',
+                'assets/images/post8.jpg',
+              ],
+
+              caption:
+              'Late nights, city lights, and quiet moments in between.',
             ),
           ],
         ),

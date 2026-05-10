@@ -1,75 +1,72 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class HomeAppBar extends StatelessWidget {
   const HomeAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 12,
+
+    return Container(
+
+      padding: const EdgeInsets.only(
+        top: 18,
+        left: 20,
+        right: 20,
+        bottom: 14,
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
 
-          /// LEFT PLUS BUTTON
-          GestureDetector(
-            onTap: () {
+      child: SafeArea(
 
-              /// popup later
+        bottom: false,
 
-            },
-            child: const Icon(
-              Icons.add,
-              size: 34,
-            ),
-          ),
+        child: Row(
+          children: [
 
-          /// APP NAME
-          Text(
-            "Social app",
-            style: GoogleFonts.cookie(
-              fontSize: 42,
-              color: Colors.black,
-            ),
-          ),
+            /// LOGO
+            const Expanded(
+              child: Text(
+                "Social app",
 
-          /// NOTIFICATION BUTTON
-          Stack(
-            children: [
+                style: TextStyle(
+                  fontSize: 32,
 
-              GestureDetector(
-                onTap: () {
+                  fontFamily: 'Cookie',
 
-                  /// notifications later
+                  color: Colors.black87,
 
-                },
-                child: const Icon(
-                  Icons.crop_square_rounded,
-                  size: 34,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
+            ),
 
-              /// RED DOT
-              Positioned(
-                right: 0,
-                top: 0,
-                child: Container(
-                  width: 10,
-                  height: 10,
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
+            /// HEART
+            _topIcon(
+              CupertinoIcons.heart,
+            ),
+
+            const SizedBox(width: 18),
+
+            /// CHAT
+            _topIcon(
+              CupertinoIcons.chat_bubble,
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _topIcon(
+      IconData icon,
+      ) {
+
+    return Icon(
+      icon,
+
+      size: 26,
+
+      color: Colors.black87,
     );
   }
 }

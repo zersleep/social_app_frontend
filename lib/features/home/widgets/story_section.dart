@@ -16,29 +16,36 @@ class StorySection extends StatelessWidget {
 
         children: const [
 
+          /// YOUR STORY
           StoryItem(
+            username: 'You',
             image: 'assets/images/story1.jpg',
-            username: 'ice_scream',
+
+            isCurrentUser: true,
+            hasStory: false,
           ),
 
+          /// USERS
           StoryItem(
+            username: 'iko',
             image: 'assets/images/story2.jpg',
-            username: 'cuifenn',
+            hasStory: true,
           ),
 
           StoryItem(
+            username: 'mara.s',
+            hasStory: true,
+          ),
+
+          StoryItem(
+            username: 'jules.h',
             image: 'assets/images/story3.jpg',
-            username: '_.brainn',
+            hasStory: true,
           ),
 
           StoryItem(
-            image: 'assets/images/story4.jpg',
-            username: 'm.a.a.m',
-          ),
-
-          StoryItem(
-            image: 'assets/images/story5.jpg',
-            username: 'Lemon_juice',
+            username: 'ona',
+            hasStory: true,
           ),
         ],
       ),

@@ -69,8 +69,12 @@ flutter:
 
   assets:
     - assets/images/
-    - assets/icons/
     - assets/videos/
+
+  fonts:
+    - family: Cookie
+      fonts:
+        - asset: assets/fonts/Cookie-Regular.ttf
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
