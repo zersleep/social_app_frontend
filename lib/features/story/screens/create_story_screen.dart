@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'story_privacy_screen.dart';
 
 class CreateStoryScreen extends StatefulWidget {
   const CreateStoryScreen({super.key});
@@ -18,6 +19,10 @@ class _CreateStoryScreenState
   ImagePicker();
 
   File? selectedImage;
+
+  bool isSelectingMultiple = false;
+
+  List<int> selectedIndexes = [];
 
   Future<void> pickImage() async {
 
@@ -53,7 +58,7 @@ class _CreateStoryScreenState
             Padding(
               padding:
               const EdgeInsets.symmetric(
-                horizontal: 18,
+                horizontal: 12,
                 vertical: 10,
               ),
 
@@ -89,25 +94,41 @@ class _CreateStoryScreenState
 
                   const Spacer(),
 
-                  Container(
-                    width: 48,
-                    height: 48,
+                  GestureDetector(
 
-                    decoration: BoxDecoration(
+                    onTap: () {
 
-                      color: Colors.white,
+                      Navigator.push(
 
-                      borderRadius:
-                      BorderRadius.circular(12),
+                        context,
 
-                      border: Border.all(
-                        color: Colors.black12,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                          const StoryPrivacyScreen(),
+                        ),
+                      );
+                    },
+
+                    child: Container(
+                      width: 48,
+                      height: 48,
+
+                      decoration: BoxDecoration(
+
+                        color: Colors.white,
+
+                        borderRadius:
+                        BorderRadius.circular(16),
+
+                        border: Border.all(
+                          color: Colors.black12,
+                        ),
                       ),
-                    ),
 
-                    child: const Icon(
-                      Icons.settings_outlined,
-                      color: Colors.black,
+                      child: const Icon(
+                        Icons.settings_outlined,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
                 ],
@@ -116,11 +137,105 @@ class _CreateStoryScreenState
 
             const SizedBox(height: 14),
 
+            /// MULTIPLE TOP BAR
+            if (isSelectingMultiple)
+
+              Padding(
+                padding:
+                const EdgeInsets.symmetric(
+                  horizontal: 12,
+                ),
+
+                child: Row(
+                  children: [
+
+                    /// CANCEL
+                    GestureDetector(
+
+                      onTap: () {
+
+                        setState(() {
+
+                          isSelectingMultiple =
+                          false;
+
+                          selectedIndexes.clear();
+                        });
+                      },
+
+                      child: const Text(
+                        "Cancel",
+
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight:
+                          FontWeight.w500,
+                        ),
+                      ),
+                    ),
+
+                    const Spacer(),
+
+                    /// COUNT
+                    Text(
+
+                      "${selectedIndexes.length} selected",
+
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight:
+                        FontWeight.w600,
+                      ),
+                    ),
+
+                    const Spacer(),
+
+                    /// NEXT
+                    GestureDetector(
+
+                      onTap: () {
+
+                        /// NEXT LATER
+                      },
+
+                      child: Container(
+
+                        padding:
+                        const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+
+                        decoration: BoxDecoration(
+
+                          color: Colors.black,
+
+                          borderRadius:
+                          BorderRadius.circular(12),
+                        ),
+
+                        child: const Text(
+                          "Next",
+
+                          style: TextStyle(
+                            color: Colors.white,
+
+                            fontWeight:
+                            FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
             /// TOP ACTIONS
+          if (!isSelectingMultiple)
             Padding(
               padding:
               const EdgeInsets.symmetric(
-                horizontal: 18,
+                horizontal: 12,
               ),
 
               child: Row(
@@ -163,70 +278,136 @@ class _CreateStoryScreenState
             Padding(
               padding:
               const EdgeInsets.symmetric(
-                horizontal: 18,
+                horizontal: 12,
               ),
 
               child: Row(
                 children: [
 
-                  const Text(
-                    "Gallery",
+                  PopupMenuButton<String>(
 
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
+                    color: Colors.white,
+
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                      BorderRadius.circular(18),
                     ),
-                  ),
 
-                  const SizedBox(width: 4),
+                    itemBuilder: (context) => [
 
-                  const Icon(
-                    Icons.keyboard_arrow_down,
-                    size: 24,
+                      const PopupMenuItem(
+                        value: "gallery",
+
+                        child: Text("Gallery"),
+                      ),
+
+                      const PopupMenuItem(
+                        value: "camera",
+
+                        child: Text("Camera"),
+                      ),
+
+                      const PopupMenuItem(
+                        value: "downloads",
+
+                        child: Text("Downloads"),
+                      ),
+                    ],
+
+                    child: const Row(
+                      children: [
+
+                        Text(
+                          "Gallery",
+
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black,
+                          ),
+                        ),
+
+                        SizedBox(width: 4),
+
+                        Icon(
+                          Icons.keyboard_arrow_down,
+                          size: 24,
+                        ),
+                      ],
+                    ),
                   ),
 
                   const Spacer(),
 
                   /// MULTIPLE
-                  Container(
-                    padding:
-                    const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 7,
-                    ),
+                  if (!isSelectingMultiple)
+                  GestureDetector(
 
-                    decoration: BoxDecoration(
+                    onTap: () {
 
-                      borderRadius:
-                      BorderRadius.circular(14),
+                      setState(() {
 
-                      border: Border.all(
-                        color: Colors.black,
-                        width: 1.2,
+                        isSelectingMultiple =
+                        !isSelectingMultiple;
+                      });
+                    },
+
+                    child: Container(
+                      padding:
+                      const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 7,
                       ),
-                    ),
 
-                    child: const Row(
-                      children: [
+                      decoration: BoxDecoration(
 
-                        Icon(
-                          Icons.layers_rounded,
-                          size: 17,
+                        color:
+                        isSelectingMultiple
+                            ? Colors.black
+                            : Colors.white,
+
+                        borderRadius:
+                        BorderRadius.circular(14),
+
+                        border: Border.all(
                           color: Colors.black,
+                          width: 1.2,
                         ),
+                      ),
 
-                        SizedBox(width: 6),
+                      child: Row(
+                        children: [
 
-                        Text(
-                          "Multiple",
+                          Icon(
+                            Icons.layers_rounded,
 
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight:
-                            FontWeight.w600,
+                            size: 17,
+
+                            color:
+                            isSelectingMultiple
+                                ? Colors.white
+                                : Colors.black,
                           ),
-                        ),
-                      ],
+
+                          const SizedBox(width: 6),
+
+                          Text(
+                            "Select multiple",
+
+                            style: TextStyle(
+                              fontSize: 13,
+
+                              fontWeight:
+                              FontWeight.w600,
+
+                              color:
+                              isSelectingMultiple
+                                  ? Colors.white
+                                  : Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -246,13 +427,13 @@ class _CreateStoryScreenState
                       ? Padding(
                     padding:
                     const EdgeInsets.symmetric(
-                      horizontal: 18,
+                      horizontal: 12,
                     ),
 
                     child: Image.file(
                       selectedImage!,
 
-                      fit: BoxFit.cover,
+                      fit: BoxFit.contain,
 
                       width: double.infinity,
                     ),
@@ -263,10 +444,11 @@ class _CreateStoryScreenState
 
                     padding:
                     const EdgeInsets.symmetric(
-                      horizontal: 18,
+                      horizontal: 12,
                     ),
 
-                    itemCount: 30,
+                    itemCount:
+                    galleryImages.length + 1,
 
                     gridDelegate:
                     const SliverGridDelegateWithFixedCrossAxisCount(
@@ -276,28 +458,25 @@ class _CreateStoryScreenState
                       crossAxisSpacing: 4,
 
                       mainAxisSpacing: 4,
+
+                      childAspectRatio: 0.68,
                     ),
 
                     itemBuilder:
                         (context, index) {
 
-                      return GestureDetector(
+                      /// FIRST BOX
+                      if (index == 0) {
 
-                        onTap: pickImage,
+                        return GestureDetector(
 
-                        child: ClipRRect(
-
-                          borderRadius:
-                          BorderRadius.circular(6),
+                          onTap: pickImage,
 
                           child: Container(
 
-                            color:
-                            Colors.grey.shade100,
+                            color: Colors.grey.shade100,
 
-                            child: index == 0
-
-                                ? const Center(
+                            child: const Center(
                               child: Icon(
                                 Icons.add_photo_alternate,
 
@@ -305,22 +484,138 @@ class _CreateStoryScreenState
 
                                 color: Colors.black54,
                               ),
-                            )
-
-                                : Image.asset(
-
-                              index % 5 == 0
-                                  ? 'assets/images/post1.jpg'
-                                  : index % 4 == 0
-                                  ? 'assets/images/post2.jpg'
-                                  : index % 3 == 0
-                                  ? 'assets/images/post3.jpg'
-                                  : index % 2 == 0
-                                  ? 'assets/images/post4.jpg'
-                                  : 'assets/images/post5.jpg',
-
-                              fit: BoxFit.cover,
                             ),
+                          ),
+                        );
+                      }
+
+                      final bool isSelected =
+                      selectedIndexes.contains(index);
+
+                      return GestureDetector(
+
+                        onTap: () {
+
+                          /// MULTIPLE MODE
+                          if (isSelectingMultiple) {
+
+                            setState(() {
+
+                              if (selectedIndexes
+                                  .contains(index)) {
+
+                                selectedIndexes
+                                    .remove(index);
+
+                              } else {
+
+                                selectedIndexes
+                                    .add(index);
+                              }
+                            });
+                          }
+
+                          /// SINGLE MODE
+                          else {
+
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(
+
+                              const SnackBar(
+                                content:
+                                Text("Single image selected"),
+                              ),
+                            );
+                          }
+                        },
+
+                        child: AnimatedScale(
+
+                          duration:
+                          const Duration(
+                              milliseconds: 180),
+
+                          scale:
+                          isSelected ? 0.94 : 1,
+
+                          child: Stack(
+                            children: [
+
+                              Positioned.fill(
+
+                                child:
+                                AnimatedContainer(
+
+                                  duration:
+                                  const Duration(
+                                      milliseconds: 180),
+
+                                  decoration: BoxDecoration(
+
+                                    border: isSelected
+
+                                        ? Border.all(
+                                      color: Colors.blue,
+                                      width: 3,
+                                    )
+
+                                        : null,
+                                  ),
+
+                                  child: Image.asset(
+
+                                    galleryImages[
+                                    (index - 1) %
+                                        galleryImages.length
+                                    ],
+
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+
+                              /// NUMBERED SELECT
+                              if (isSelected)
+
+                                Positioned(
+                                  top: 8,
+                                  right: 8,
+
+                                  child: Container(
+
+                                    width: 24,
+                                    height: 24,
+
+                                    decoration:
+                                    const BoxDecoration(
+
+                                      color: Colors.blue,
+
+                                      shape:
+                                      BoxShape.circle,
+                                    ),
+
+                                    child: Center(
+                                      child: Text(
+
+                                        "${selectedIndexes.indexOf(index) + 1}",
+
+                                        style:
+                                        const TextStyle(
+
+                                          color:
+                                          Colors.white,
+
+                                          fontSize: 12,
+
+                                          fontWeight:
+                                          FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
                       );
@@ -334,9 +629,21 @@ class _CreateStoryScreenState
 
                     child: GestureDetector(
 
-                      onTap: () {
+                      onTap: () async {
 
-                        /// CAMERA LATER
+                        final XFile? file =
+                        await picker.pickImage(
+                          source: ImageSource.camera,
+                        );
+
+                        if (file != null) {
+
+                          setState(() {
+
+                            selectedImage =
+                                File(file.path);
+                          });
+                        }
                       },
 
                       child: Container(
@@ -360,7 +667,8 @@ class _CreateStoryScreenState
 
                               blurRadius: 14,
 
-                              offset: const Offset(0, 5),
+                              offset:
+                              const Offset(0, 5),
                             ),
                           ],
                         ),
@@ -370,7 +678,7 @@ class _CreateStoryScreenState
 
                           size: 26,
 
-                          color: Color(0xFF2F80ED),
+                          color: Colors.black,
                         ),
                       ),
                     ),
@@ -383,6 +691,19 @@ class _CreateStoryScreenState
       ),
     );
   }
+
+  final List<String> galleryImages = [
+
+    'assets/images/post1.jpg',
+    'assets/images/post2.jpg',
+    'assets/images/post3.jpg',
+    'assets/images/post4.jpg',
+    'assets/images/post5.jpg',
+    'assets/images/post6.jpg',
+    'assets/images/post7.jpg',
+    'assets/images/post8.jpg',
+    'assets/images/story1.jpg',
+  ];
 
   Widget buildTopButton({
     required IconData icon,

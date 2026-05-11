@@ -109,7 +109,7 @@ class _ReelItemState extends State<ReelItem> {
 
                   colors: [
                     Colors.transparent,
-                    Colors.black.withOpacity(0.4),
+                    Colors.black.withValues(alpha: 0.4),
                   ],
                 ),
               ),
