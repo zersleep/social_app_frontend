@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../story/screens/story_viewer_screen.dart';
 import '../../story/story_data.dart';
+import '../../story/screens/create_story_screen.dart';
 
 class StoryItem extends StatelessWidget {
 
@@ -8,6 +9,7 @@ class StoryItem extends StatelessWidget {
   final String? image;
 
   final bool hasStory;
+  final bool isViewed;
   final bool isCurrentUser;
 
   const StoryItem({
@@ -16,6 +18,7 @@ class StoryItem extends StatelessWidget {
     this.image,
     this.hasStory = false,
     this.isCurrentUser = false,
+    this.isViewed = false,
   });
 
   @override
@@ -28,28 +31,78 @@ class StoryItem extends StatelessWidget {
 
       onTap: () {
 
-        final int userIndex =
-        storyUsers.indexWhere(
+        /// CURRENT USER
+        if (isCurrentUser) {
 
-              (user) =>
-          user.username == username,
-        );
+          /// HAS STORY
+          if (hasStory) {
 
-        Navigator.push(
-          context,
+            final int userIndex =
+            storyUsers.indexWhere(
 
-          MaterialPageRoute(
-            builder: (_) => StoryViewerScreen(
+                  (user) =>
+              user.username == username,
+            );
 
-              users: storyUsers,
+            Navigator.push(
+              context,
 
-              initialUserIndex:
-              userIndex == -1
-                  ? 0
-                  : userIndex,
+              MaterialPageRoute(
+                builder: (_) =>
+                    StoryViewerScreen(
+
+                      users: storyUsers,
+
+                      initialUserIndex:
+                      userIndex == -1
+                          ? 0
+                          : userIndex,
+                    ),
+              ),
+            );
+          }
+
+          /// NO STORY
+          else {
+
+            Navigator.push(
+              context,
+
+              MaterialPageRoute(
+                builder: (_) =>
+                const CreateStoryScreen(),
+              ),
+            );
+          }
+        }
+
+        /// OTHER USERS
+        else {
+
+          final int userIndex =
+          storyUsers.indexWhere(
+
+                (user) =>
+            user.username == username,
+          );
+
+          Navigator.push(
+            context,
+
+            MaterialPageRoute(
+              builder: (_) =>
+                  StoryViewerScreen(
+
+                    users: storyUsers,
+
+                    initialUserIndex:
+                    userIndex == -1
+                        ? 0
+                        : userIndex,
+                  ),
             ),
-          ),
-        );
+          );
+        }
       },
 
       child: Padding(
@@ -71,10 +124,24 @@ class StoryItem extends StatelessWidget {
                     shape: BoxShape.circle,
 
                     gradient: hasStory
-                        ? const LinearGradient(
-                      colors: [
+
+                        ? LinearGradient(
+
+                      colors:
+
+                      isViewed
+
+                          ? [
+                        Colors.grey,
+                        Colors.grey,
+                      ]
+
+                          : const [
+
                         Color(0xFFFF5F6D),
+
                         Color(0xFFFF9966),
+
                         Color(0xFFFFC371),
                       ],
                     )

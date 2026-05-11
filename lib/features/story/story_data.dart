@@ -43,35 +43,6 @@ final List<StoryUserModel> storyUsers = [
 
   StoryUserModel(
 
-    username: 'jules.h',
-
-    profileImage:
-    'assets/images/story3.jpg',
-
-    stories: [
-
-      StoryModel(
-        type: StoryType.image,
-
-        media:
-        'assets/images/post4.jpg',
-
-        time: '3h',
-      ),
-
-      StoryModel(
-        type: StoryType.video,
-
-        media:
-        'assets/videos/reel2.mp4',
-
-        time: '2h',
-      ),
-    ],
-  ),
-
-  StoryUserModel(
-
     username: 'mara.s',
 
     profileImage:
@@ -95,6 +66,35 @@ final List<StoryUserModel> storyUsers = [
         'assets/images/post7.jpg',
 
         time: '45m',
+      ),
+    ],
+  ),
+
+  StoryUserModel(
+
+    username: 'jules.h',
+
+    profileImage:
+    'assets/images/story3.jpg',
+
+    stories: [
+
+      StoryModel(
+        type: StoryType.image,
+
+        media:
+        'assets/images/post4.jpg',
+
+        time: '3h',
+      ),
+
+      StoryModel(
+        type: StoryType.video,
+
+        media:
+        'assets/videos/reel2.mp4',
+
+        time: '2h',
       ),
     ],
   ),

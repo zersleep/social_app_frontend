@@ -26,19 +26,23 @@ class StoryViewerScreen extends StatefulWidget {
 class _StoryViewerScreenState
     extends State<StoryViewerScreen> {
 
+  late PageController pageController;
+
   late int currentUserIndex;
 
   int currentStoryIndex = 0;
 
   Timer? timer;
 
-  bool isPaused = false;
-
   bool showHeart = false;
+
+  bool isLiked = false;
 
   double progress = 0;
 
   double dragOffset = 0;
+
+  double edgeOffset = 0;
 
   VideoPlayerController? videoController;
 
@@ -55,6 +59,14 @@ class _StoryViewerScreenState
     currentUserIndex =
         widget.initialUserIndex;
 
+    pageController = PageController(
+      initialPage:
+      widget.initialUserIndex,
+    );
+
+    widget.users[currentUserIndex]
+        .viewed = true;
+
     _loadStory();
   }
 
@@ -64,8 +76,9 @@ class _StoryViewerScreenState
 
     videoController?.dispose();
 
-    final story = currentStory;
     progress = 0;
+
+    final story = currentStory;
 
     if (story.type == StoryType.video) {
 
@@ -112,21 +125,16 @@ class _StoryViewerScreenState
               progress =
                   position / duration;
             });
+
+            if (progress >= 1) {
+
+              timer.cancel();
+
+              _nextStory();
+            }
           }
         },
       );
-
-      videoController!
-          .addListener(() {
-
-        if (videoController!
-            .value.position >=
-            videoController!
-                .value.duration) {
-
-          _nextStory();
-        }
-      });
 
     } else {
 
@@ -169,28 +177,19 @@ class _StoryViewerScreenState
       if (currentUserIndex <
           widget.users.length - 1) {
 
-        setState(() {
+        pageController.nextPage(
 
-          currentUserIndex++;
+          duration:
+          const Duration(
+              milliseconds: 300),
 
-          currentStoryIndex = 0;
-        });
-
-        _loadStory();
+          curve:
+          Curves.easeOutCubic,
+        );
 
       } else {
 
-        timer?.cancel();
-
-        videoController?.dispose();
-
-        Future.microtask(() {
-
-          if (mounted) {
-
-            Navigator.of(context).pop();
-          }
-        });
+        Navigator.pop(context);
       }
     }
   }
@@ -204,29 +203,29 @@ class _StoryViewerScreenState
       });
 
       _loadStory();
+    }
 
-    } else {
+    else if (
+    currentUserIndex == 0) {
 
-      if (currentUserIndex > 0) {
+      Navigator.pop(context);
+    }
 
-        setState(() {
+    else {
 
-          currentUserIndex--;
+      pageController.previousPage(
 
-          currentStoryIndex =
-              currentUser
-                  .stories
-                  .length - 1;
-        });
+        duration:
+        const Duration(
+            milliseconds: 300),
 
-        _loadStory();
-      }
+        curve:
+        Curves.easeOutCubic,
+      );
     }
   }
 
   void _pauseStory() {
-
-    isPaused = true;
 
     timer?.cancel();
 
@@ -234,8 +233,6 @@ class _StoryViewerScreenState
   }
 
   void _resumeStory() {
-
-    isPaused = false;
 
     if (currentStory.type ==
         StoryType.image) {
@@ -307,7 +304,360 @@ class _StoryViewerScreenState
 
     videoController?.dispose();
 
+    pageController.dispose();
+
     super.dispose();
+  }
+
+  Widget buildStoryPage(
+      StoryUserModel user,
+      int index,
+      ) {
+
+    final story =
+    user.stories[currentStoryIndex];
+
+    return Stack(
+      children: [
+
+        /// MEDIA
+        SizedBox.expand(
+
+          child:
+          story.type ==
+              StoryType.image
+
+              ? Container(
+
+            color: Colors.black,
+
+            child: Center(
+              child: Image.asset(
+
+                story.media,
+
+                fit: BoxFit.contain,
+
+                width: double.infinity,
+              ),
+            ),
+          )
+
+              : videoController != null &&
+              currentUserIndex == index &&
+              videoController!
+                  .value
+                  .isInitialized
+
+              ? Container(
+
+            color: Colors.black,
+
+            child: FittedBox(
+              fit: BoxFit.contain,
+
+              child: SizedBox(
+                width:
+                videoController!
+                    .value
+                    .size
+                    .width,
+
+                height:
+                videoController!
+                    .value
+                    .size
+                    .height,
+
+                child: VideoPlayer(
+                  videoController!,
+                ),
+              ),
+            ),
+          )
+
+              : const Center(
+            child:
+            CircularProgressIndicator(),
+          ),
+        ),
+
+        /// HEART
+        Center(
+          child: AnimatedOpacity(
+
+            opacity:
+            showHeart ? 1 : 0,
+
+            duration:
+            const Duration(
+              milliseconds: 250,
+            ),
+
+            child: AnimatedScale(
+
+              scale:
+              showHeart ? 1 : 0.5,
+
+              duration:
+              const Duration(
+                milliseconds: 250,
+              ),
+
+              child: const Icon(
+                Icons.favorite,
+
+                color: Colors.redAccent,
+
+                size: 110,
+              ),
+            ),
+          ),
+        ),
+
+        /// TOP
+        Positioned(
+          top: 55,
+          left: 16,
+          right: 16,
+
+          child: Column(
+            children: [
+
+              /// PROGRESS
+              Row(
+                children: List.generate(
+
+                  user.stories.length,
+
+                      (storyIndex) {
+
+                    return Expanded(
+                      child: Container(
+
+                        margin:
+                        const EdgeInsets
+                            .symmetric(
+                          horizontal: 2,
+                        ),
+
+                        height: 3,
+
+                        decoration:
+                        BoxDecoration(
+
+                          color:
+                          Colors.white24,
+
+                          borderRadius:
+                          BorderRadius
+                              .circular(10),
+                        ),
+
+                        child:
+                        FractionallySizedBox(
+
+                          alignment:
+                          Alignment.centerLeft,
+
+                          widthFactor:
+
+                          storyIndex <
+                              currentStoryIndex
+
+                              ? 1
+
+                              : storyIndex ==
+                              currentStoryIndex &&
+                              currentUserIndex ==
+                                  index
+
+                              ? progress
+
+                              : 0,
+
+                          child: Container(
+
+                            decoration:
+                            BoxDecoration(
+
+                              color:
+                              Colors.white,
+
+                              borderRadius:
+                              BorderRadius
+                                  .circular(
+                                  10),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+              const SizedBox(height: 14),
+
+              /// USER
+              Row(
+                children: [
+
+                  CircleAvatar(
+                    radius: 16,
+
+                    backgroundImage:
+                    AssetImage(
+                      user.profileImage,
+                    ),
+                  ),
+
+                  const SizedBox(width: 8),
+
+                  Text(
+                    user.username,
+
+                    style:
+                    const TextStyle(
+                      color:
+                      Colors.white,
+
+                      fontWeight:
+                      FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(width: 6),
+
+                  Text(
+                    story.time,
+
+                    style:
+                    const TextStyle(
+                      color:
+                      Colors.white70,
+                    ),
+                  ),
+
+                  const Spacer(),
+
+                  GestureDetector(
+
+                    onTap: () {
+                      Navigator.pop(
+                          context);
+                    },
+
+                    child: const Icon(
+                      Icons.close,
+
+                      color:
+                      Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+
+        /// BOTTOM
+        Positioned(
+          left: 16,
+          right: 16,
+          bottom: 40,
+
+          child: Row(
+            children: [
+
+              Expanded(
+                child: Container(
+
+                  padding:
+                  const EdgeInsets
+                      .symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+
+                  decoration:
+                  BoxDecoration(
+
+                    border:
+                    Border.all(
+                      color:
+                      Colors.white38,
+                    ),
+
+                    borderRadius:
+                    BorderRadius
+                        .circular(30),
+                  ),
+
+                  child: Text(
+                    "Reply to ${user.username}...",
+
+                    style:
+                    const TextStyle(
+                      color:
+                      Colors.white70,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 14),
+
+              GestureDetector(
+
+                onTap: () {
+
+                  setState(() {
+
+                    isLiked = !isLiked;
+                  });
+                },
+
+                child: AnimatedScale(
+
+                  duration:
+                  const Duration(
+                      milliseconds: 180),
+
+                  scale:
+                  isLiked ? 1.15 : 1,
+
+                  child: Icon(
+
+                    isLiked
+
+                        ? Icons.favorite
+
+                        : Icons.favorite_border,
+
+                    color:
+
+                    isLiked
+
+                        ? Colors.redAccent
+
+                        : Colors.white,
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 18),
+
+              const Icon(
+                Icons.send_rounded,
+
+                color: Colors.white,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -315,69 +665,69 @@ class _StoryViewerScreenState
 
     return GestureDetector(
 
-      onHorizontalDragEnd: (details) {
+      behavior:
+      HitTestBehavior.translucent,
 
-        if (details.primaryVelocity == null) {
-          return;
+      /// EDGE CLOSE SWIPE
+      onHorizontalDragUpdate: (details) {
+
+        /// FIRST USER
+        if (currentUserIndex == 0 &&
+            details.delta.dx > 0) {
+
+          setState(() {
+
+            edgeOffset += details.delta.dx;
+          });
         }
 
-        /// SWIPE LEFT
-        if (details.primaryVelocity! < 0) {
+        /// LAST USER
+        else if (
+        currentUserIndex ==
+            widget.users.length - 1 &&
+            details.delta.dx < 0) {
 
-          if (currentStoryIndex <
-              currentUser.stories.length - 1) {
+          setState(() {
 
-            _nextStory();
-
-          } else {
-
-            if (currentUserIndex <
-                widget.users.length - 1) {
-
-              setState(() {
-
-                currentUserIndex++;
-
-                currentStoryIndex = 0;
-              });
-
-              _loadStory();
-            }
-          }
-        }
-
-        /// SWIPE RIGHT
-        else if (details.primaryVelocity! > 0) {
-
-          if (currentStoryIndex > 0) {
-
-            _previousStory();
-
-          } else {
-
-            if (currentUserIndex > 0) {
-
-              setState(() {
-
-                currentUserIndex--;
-
-                currentStoryIndex =
-                    currentUser
-                        .stories
-                        .length - 1;
-              });
-
-              _loadStory();
-            }
-          }
+            edgeOffset += details.delta.dx;
+          });
         }
       },
 
+      onHorizontalDragEnd: (_) {
+
+        /// FIRST USER CLOSE
+        if (currentUserIndex == 0 &&
+            edgeOffset > 60) {
+
+          Navigator.pop(context);
+        }
+
+        /// LAST USER CLOSE
+        else if (
+        currentUserIndex ==
+            widget.users.length - 1 &&
+            edgeOffset < -60) {
+
+          Navigator.pop(context);
+        }
+
+        setState(() {
+
+          edgeOffset = 0;
+        });
+      },
+
+      /// DRAG DOWN
       onVerticalDragUpdate: (details) {
 
         setState(() {
 
           dragOffset += details.delta.dy;
+
+          if (dragOffset < 0) {
+            dragOffset = 0;
+          }
         });
       },
 
@@ -396,6 +746,7 @@ class _StoryViewerScreenState
         }
       },
 
+      /// HOLD
       onLongPressStart: (_) {
 
         _pauseStory();
@@ -406,21 +757,25 @@ class _StoryViewerScreenState
         _resumeStory();
       },
 
+      /// DOUBLE TAP
       onDoubleTap: () {
 
         setState(() {
+
           showHeart = true;
+
+          isLiked = true;
         });
 
         Future.delayed(
-          const Duration(
-              milliseconds: 700),
+          const Duration(milliseconds: 700),
 
               () {
 
             if (mounted) {
 
               setState(() {
+
                 showHeart = false;
               });
             }
@@ -428,334 +783,98 @@ class _StoryViewerScreenState
         );
       },
 
-      child: GestureDetector(
+      /// TAP
+      onTapUp: (details) {
 
-        behavior:
-          HitTestBehavior.translucent,
+        final width =
+            MediaQuery.of(context)
+                .size
+                .width;
 
-          onTapUp: (details) {
+        final dx =
+            details.globalPosition.dx;
 
-            final width =
-                MediaQuery.of(context)
-                    .size
-                    .width;
+        if (dx < width / 2) {
 
-            final dx =
-                details.globalPosition.dx;
+          _previousStory();
 
-            if (dx < width / 2) {
+        } else {
 
-              _previousStory();
+          _nextStory();
+        }
+      },
 
-            } else {
+      child: AnimatedOpacity(
 
-              _nextStory();
-            }
-          },
+        duration:
+        const Duration(milliseconds: 180),
 
-          child: Transform.translate(
+        opacity:
+        (1 - (dragOffset / 500))
+            .clamp(0.7, 1),
 
-            offset: Offset(0, dragOffset),
+        child: AnimatedScale(
+
+          duration:
+          const Duration(milliseconds: 180),
+
+          scale:
+          (1 - (dragOffset / 2000))
+              .clamp(0.92, 1),
+
+          child: AnimatedContainer(
+
+            duration:
+            const Duration(milliseconds: 180),
+
+            transform:
+            Matrix4.translationValues(
+              edgeOffset,
+              dragOffset,
+              0,
+            ),
 
             child: Scaffold(
 
-            backgroundColor: Colors.black,
+              backgroundColor:
+              Colors.black,
 
-            body: Stack(
-              children: [
+              body: PageView.builder(
 
-                /// STORY MEDIA
-                SizedBox.expand(
-                  child:
+                controller:
+                pageController,
 
-                  currentStory.type ==
-                      StoryType.image
+                physics:
+                const ClampingScrollPhysics(),
 
-                      ? Container(
+                onPageChanged: (index) {
 
-                    color: Colors.black,
+                  setState(() {
 
-                    child: Center(
-                      child: Image.asset(
+                    currentUserIndex =
+                        index;
 
-                        currentStory.media,
+                    currentStoryIndex = 0;
+                  });
 
-                        fit: BoxFit.contain,
+                  widget.users[index]
+                      .viewed = true;
 
-                        width: double.infinity,
-                      ),
-                    ),
-                  )
+                  _loadStory();
+                },
 
-                      : videoController != null &&
-                      videoController!
-                          .value
-                          .isInitialized
+                itemCount:
+                widget.users.length,
 
-                      ? FittedBox(
-                    fit: BoxFit.contain,
+                itemBuilder:
+                    (context, index) {
 
-                    child: SizedBox(
-                      width:
-                      videoController!
-                          .value
-                          .size
-                          .width,
-
-                      height:
-                      videoController!
-                          .value
-                          .size
-                          .height,
-
-                      child: VideoPlayer(
-                        videoController!,
-                      ),
-                    ),
-                  )
-
-                      : const Center(
-                    child:
-                    CircularProgressIndicator(),
-                  ),
-                ),
-
-                /// HEART ANIMATION
-                Center(
-                  child: AnimatedOpacity(
-
-                    opacity:
-                    showHeart ? 1 : 0,
-
-                    duration:
-                    const Duration(
-                      milliseconds: 250,
-                    ),
-
-                    child: AnimatedScale(
-
-                      scale:
-                      showHeart ? 1 : 0.5,
-
-                      duration:
-                      const Duration(
-                        milliseconds: 250,
-                      ),
-
-                      child: const Icon(
-                        Icons.favorite,
-
-                        color: Colors.white,
-
-                        size: 110,
-                      ),
-                    ),
-                  ),
-                ),
-
-                /// TOP UI
-                Positioned(
-                  top: 55,
-                  left: 16,
-                  right: 16,
-
-                  child: Column(
-                    children: [
-
-                      /// ANIMATED PROGRESS
-                      Row(
-                        children: List.generate(
-
-                          currentUser.stories.length,
-
-                              (index) {
-
-                            return Expanded(
-                              child: Container(
-
-                                margin:
-                                const EdgeInsets.symmetric(
-                                  horizontal: 2,
-                                ),
-
-                                height: 3,
-
-                                decoration: BoxDecoration(
-
-                                  color: Colors.white24,
-
-                                  borderRadius:
-                                  BorderRadius.circular(
-                                      10),
-                                ),
-
-                                child: FractionallySizedBox(
-
-                                  alignment:
-                                  Alignment.centerLeft,
-
-                                  widthFactor:
-
-                                  index < currentStoryIndex
-
-                                      ? 1
-
-                                      : index ==
-                                      currentStoryIndex
-
-                                      ? progress
-
-                                      : 0,
-
-                                  child: Container(
-
-                                    decoration: BoxDecoration(
-
-                                      color: Colors.white,
-
-                                      borderRadius:
-                                      BorderRadius.circular(
-                                          10),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-
-                      const SizedBox(height: 14),
-
-                      /// USER INFO
-                      Row(
-                        children: [
-
-                          CircleAvatar(
-                            radius: 16,
-
-                            backgroundImage:
-                            AssetImage(
-                              currentUser
-                                  .profileImage,
-                            ),
-                          ),
-
-                          const SizedBox(width: 8),
-
-                          Text(
-                            currentUser.username,
-
-                            style:
-                            const TextStyle(
-                              color:
-                              Colors.white,
-
-                              fontWeight:
-                              FontWeight.bold,
-                            ),
-                          ),
-
-                          const SizedBox(width: 6),
-
-                          Text(
-                            currentStory.time,
-
-                            style:
-                            const TextStyle(
-                              color:
-                              Colors.white70,
-                            ),
-                          ),
-
-                          const Spacer(),
-
-                          GestureDetector(
-
-                            onTap: () {
-                              Navigator.pop(
-                                  context);
-                            },
-
-                            child: const Icon(
-                              Icons.close,
-
-                              color:
-                              Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                /// BOTTOM UI
-                Positioned(
-                  left: 16,
-                  right: 16,
-                  bottom: 40,
-
-                  child: Row(
-                    children: [
-
-                      /// REPLY FIELD
-                      Expanded(
-                        child: Container(
-
-                          padding:
-                          const EdgeInsets
-                              .symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-
-                          decoration:
-                          BoxDecoration(
-
-                            border:
-                            Border.all(
-                              color:
-                              Colors.white38,
-                            ),
-
-                            borderRadius:
-                            BorderRadius
-                                .circular(
-                                30),
-                          ),
-
-                          child: Text(
-                            "Reply to ${currentUser.username}...",
-
-                            style:
-                            const TextStyle(
-                              color:
-                              Colors.white70,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(width: 14),
-
-                      const Icon(
-                        Icons.favorite_border,
-
-                        color: Colors.white,
-                      ),
-
-                      const SizedBox(width: 18),
-
-                      const Icon(
-                        Icons.send_rounded,
-
-                        color: Colors.white,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                  return buildStoryPage(
+                    widget.users[index],
+                    index,
+                  );
+                },
+              ),
             ),
           ),
         ),
