@@ -80,7 +80,7 @@ class HomeScreen extends StatelessWidget {
             const PostCard(
 
               profileImage:
-              'assets/images/story4.jpg',
+              'assets/images/post5.jpg',
 
               username: 'lev.p',
 
