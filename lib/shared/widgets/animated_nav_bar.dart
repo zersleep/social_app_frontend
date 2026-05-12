@@ -131,55 +131,59 @@ class _AnimatedNavBarState extends State<AnimatedNavBar>
       top: false,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-        child: Listener(
-          onPointerDown: (e) => _handleStart(e.position),
-          onPointerMove: (e) => _handleUpdate(e.position),
-          onPointerUp: (_) => _handleEnd(),
-          onPointerCancel: (_) => _handleEnd(),
-          child: AnimatedBuilder(
-            animation: _scaleAnim,
-            builder: (context, child) {
-              final scale = 1.0 + (_scaleAnim.value * 0.02);
-              return Transform.scale(
-                scale: scale,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(28),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(
-                          0.06 + _scaleAnim.value * 0.08,
+        child: Center(
+          child: Listener(
+            onPointerDown: (e) => _handleStart(e.position),
+            onPointerMove: (e) => _handleUpdate(e.position),
+            onPointerUp: (_) => _handleEnd(),
+            onPointerCancel: (_) => _handleEnd(),
+            child: AnimatedBuilder(
+              animation: _scaleAnim,
+              builder: (context, child) {
+                final scale = 1.0 + (_scaleAnim.value * 0.02);
+                return Transform.scale(
+                  scale: scale,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(28),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(
+                            0.06 + _scaleAnim.value * 0.08,
+                          ),
+                          blurRadius: 20 + _scaleAnim.value * 14,
+                          offset: Offset(0, 6 + _scaleAnim.value * 4),
                         ),
-                        blurRadius: 20 + _scaleAnim.value * 14,
-                        offset: Offset(0, 6 + _scaleAnim.value * 4),
-                      ),
-                    ],
+                      ],
+                    ),
+                    child: child,
                   ),
-                  child: child,
-                ),
-              );
-            },
-            child: Row(
-              key: _rowKey,
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: List.generate(widget.items.length, (index) {
-                final isSelected = index == widget.selectedIndex;
-                final isHovered = _isDragging && index == _hoverIndex;
-                return _NavBarItem(
-                  key: _itemKeys[index],
-                  item: widget.items[index],
-                  isSelected: isSelected,
-                  isHovered: isHovered,
-                  accent: _accent,
-                  pillBg: _pillBg,
-                  inactive: _inactive,
                 );
-              }),
+              },
+              child: Row(
+                key: _rowKey,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (int index = 0; index < widget.items.length; index++) ...[
+                    if (index > 0) const SizedBox(width: 4),
+                    _NavBarItem(
+                      key: _itemKeys[index],
+                      item: widget.items[index],
+                      isSelected: index == widget.selectedIndex,
+                      isHovered:
+                          _isDragging && index == _hoverIndex,
+                      accent: _accent,
+                      pillBg: _pillBg,
+                      inactive: _inactive,
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
         ),
