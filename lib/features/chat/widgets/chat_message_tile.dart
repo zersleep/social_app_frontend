@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
+import '../../../app/routes/app_routes.dart';
 import '../chat_models.dart';
 
 class ChatMessageTile extends StatelessWidget {
@@ -12,7 +14,9 @@ class ChatMessageTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return GestureDetector(
+      onTap: () => Get.toNamed(AppRoutes.chatView, parameters: {'name': message.name}),
+      child: Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: 20,
         vertical: 10,
@@ -118,6 +122,7 @@ class ChatMessageTile extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }

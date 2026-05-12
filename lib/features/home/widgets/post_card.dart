@@ -1,575 +1,489 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/theme/app_colors.dart';
+import '../../../shared/widgets/story_avatar.dart';
+import '../../profile/other_profile_view.dart';
 import '../../story/screens/story_viewer_screen.dart';
-import '../screens/image_viewer_screen.dart';
 import '../../story/story_data.dart';
+import '../models/post_model.dart';
+import '../screens/image_viewer_screen.dart';
+import 'post_comments_sheet.dart';
+import 'post_share_sheet.dart';
+
+// ─── Public widget ────────────────────────────────────────────────────────────
 
 class PostCard extends StatefulWidget {
+  final PostModel post;
 
-  final String profileImage;
-  final String username;
-  final String subtitle;
-
-  final List<String> postImages;
-
-  final String caption;
-
-  final bool hasStory;
-
-  const PostCard({
-    super.key,
-    required this.profileImage,
-    required this.username,
-    required this.subtitle,
-    required this.postImages,
-    required this.caption,
-    this.hasStory = false,
-  });
+  const PostCard({super.key, required this.post});
 
   @override
-  State<PostCard> createState() =>
-      _PostCardState();
+  State<PostCard> createState() => _PostCardState();
 }
 
 class _PostCardState extends State<PostCard> {
+  bool _isLiked    = false;
+  bool _isReposted = false;
 
-  int currentPage = 0;
+  void _toggleLike()   => setState(() => _isLiked    = !_isLiked);
+  void _forceLike()    => setState(() => _isLiked    = true);
+  void _toggleRepost() => setState(() => _isReposted = !_isReposted);
 
-  bool isLiked = false;
+  void _openComments() => showModalBottomSheet(
+    context:            context,
+    isScrollControlled: true,
+    backgroundColor:    Colors.transparent,
+    builder: (_) => PostCommentsSheet(post: widget.post),
+  );
 
-  bool showHeart = false;
-
-  final PageController pageController =
-  PageController();
+  void _openShare() => showModalBottomSheet(
+    context:            context,
+    isScrollControlled: true,
+    backgroundColor:    Colors.transparent,
+    builder: (_) => PostShareSheet(post: widget.post),
+  );
 
   @override
   Widget build(BuildContext context) {
+    final post = widget.post;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 16,
-      ),
-
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
       child: Column(
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
-
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
-          /// TOP USER INFO
-          Row(
-            children: [
-
-              /// PROFILE IMAGE
-              GestureDetector(
-
-                onTap: () {
-
-                  if (widget.hasStory) {
-
-                    Navigator.push(
-                      context,
-
-                      MaterialPageRoute(
-                        builder: (_) => StoryViewerScreen(
-                          users: storyUsers,
-                          initialUserIndex: 0,
-                        ),
-                      ),
-                    );
-                  }
-                },
-
-                child: Container(
-                  padding:
-                  const EdgeInsets.all(2),
-
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-
-                    gradient: widget.hasStory
-
-                        ? const LinearGradient(
-                      colors: [
-                        Color(0xFFFF5F6D),
-                        Color(0xFFFFC371),
-                      ],
-                    )
-
-                        : null,
-                  ),
-
-                  child: CircleAvatar(
-                    radius: 20,
-
-                    backgroundImage:
-                    AssetImage(
-                      widget.profileImage,
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(width: 10),
-
-              /// USER INFO
-              Expanded(
-                child: GestureDetector(
-
-                  onTap: () {
-
-                    /// profile later
-
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(
-
-                      SnackBar(
-                        content: Text(
-                          "Open ${widget.username} profile",
-                        ),
-                      ),
-                    );
-                  },
-
-                  child: Column(
-                    crossAxisAlignment:
-                    CrossAxisAlignment.start,
-
-                    children: [
-
-                      Text(
-                        widget.username,
-
-                        style:
-                        const TextStyle(
-                          fontWeight:
-                          FontWeight.bold,
-
-                          fontSize: 15,
-                        ),
-                      ),
-
-                      Text(
-                        widget.subtitle,
-
-                        style: TextStyle(
-                          color:
-                          Colors.grey
-                              .shade600,
-
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              /// MORE BUTTON
-              IconButton(
-                onPressed: () {},
-
-                icon: const Icon(
-                  Icons.more_horiz,
-                  size: 22,
-                ),
-              ),
-            ],
-          ),
-
+          _PostHeader(post: post),
           const SizedBox(height: 12),
-
-          /// IMAGE SLIDER
-          ClipRRect(
-            borderRadius:
-            BorderRadius.circular(26),
-
-            child: Stack(
-              alignment: Alignment.center,
-
-              children: [
-
-                /// PAGE VIEW
-                SizedBox(
-                  height: 320,
-
-                  child: PageView.builder(
-
-                    controller: pageController,
-
-                    itemCount:
-                    widget.postImages.length,
-
-                    onPageChanged: (index) {
-
-                      setState(() {
-                        currentPage = index;
-                      });
-                    },
-
-                    itemBuilder:
-                        (context, index) {
-
-                      return GestureDetector(
-
-                        onDoubleTap: () {
-
-                          setState(() {
-
-                            isLiked = true;
-
-                            showHeart = true;
-                          });
-
-                          Future.delayed(
-                            const Duration(milliseconds: 700),
-
-                                () {
-
-                              if (mounted) {
-
-                                setState(() {
-
-                                  showHeart = false;
-                                });
-                              }
-                            },
-                          );
-                        },
-
-                        onTap: () {
-
-                          Navigator.push(
-                            context,
-
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  ImageViewerScreen(
-
-                                    images:
-                                    widget.postImages,
-
-                                    initialIndex:
-                                    index,
-                                  ),
-                            ),
-                          );
-                        },
-
-                        child: Container(
-
-                          color: Colors.black,
-
-                          child: Center(
-                            child: Image.asset(
-
-                              widget.postImages[
-                              index
-                              ],
-
-                              fit: BoxFit.contain,
-
-                              width:
-                              double.infinity,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-
-                /// IMAGE COUNT
-                Positioned(
-                  top: 12,
-                  right: 12,
-
-                  child: Container(
-                    padding:
-                    const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-
-                    decoration: BoxDecoration(
-                      color: Colors.black38,
-
-                      borderRadius:
-                      BorderRadius.circular(
-                          20),
-                    ),
-
-                    child: Text(
-                      "${currentPage + 1}/${widget.postImages.length}",
-
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight:
-                        FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-
-                /// DOTS
-                Positioned(
-                  bottom: 14,
-
-                  child: Row(
-                    children: List.generate(
-
-                      widget.postImages.length,
-
-                          (index) {
-
-                        final bool active =
-                            currentPage == index;
-
-                        return AnimatedContainer(
-
-                          duration:
-                          const Duration(
-                            milliseconds: 200,
-                          ),
-
-                          margin:
-                          const EdgeInsets.symmetric(
-                            horizontal: 3,
-                          ),
-
-                          width:
-                          active ? 18 : 5,
-
-                          height: 5,
-
-                          decoration:
-                          BoxDecoration(
-
-                            color:
-                            active
-
-                                ? Colors.white
-
-                                : Colors.white54,
-
-                            borderRadius:
-                            BorderRadius.circular(
-                                20),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-
-                /// HEART ANIMATION
-                AnimatedOpacity(
-
-                  duration:
-                  const Duration(milliseconds: 250),
-
-                  opacity: showHeart ? 1 : 0,
-
-                  child: AnimatedScale(
-
-                    duration:
-                    const Duration(milliseconds: 250),
-
-                    scale: showHeart ? 1 : 0.6,
-
-                    child: const Icon(
-                      Icons.favorite,
-
-                      color: Colors.white,
-
-                      size: 110,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
+          _PostImageSlider(images: post.images, onLike: _forceLike),
           const SizedBox(height: 14),
+          _PostActions(
+            isLiked:       _isLiked,
+            isReposted:    _isReposted,
+            onToggleLike:  _toggleLike,
+            onComment:     _openComments,
+            onRepost:      _toggleRepost,
+            onShare:       _openShare,
+          ),
+          const SizedBox(height: 12),
+          _PostCaption(
+            post:            post,
+            isLiked:         _isLiked,
+            onViewComments:  _openComments,
+          ),
+          const SizedBox(height: 18),
+          const _PostDivider(),
+        ],
+      ),
+    );
+  }
+}
 
-          /// ACTIONS
-          Padding(
-            padding:
-            const EdgeInsets.symmetric(
-              horizontal: 2,
+// ─── Sub-widgets ──────────────────────────────────────────────────────────────
+
+class _PostHeader extends StatelessWidget {
+  final PostModel post;
+  const _PostHeader({required this.post});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        // Avatar with optional story ring
+        GestureDetector(
+          onTap: () {
+            if (!post.hasStory) return;
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => StoryViewerScreen(
+                  users:            storyUsers,
+                  initialUserIndex: 0,
+                ),
+              ),
+            );
+          },
+          child: StoryAvatar(
+            imagePath: post.profileImage,
+            username:  post.username,
+            radius:    20,
+            hasRing:   post.hasStory,
+          ),
+        ),
+        const SizedBox(width: 10),
+
+        // Username + subtitle
+        Expanded(
+          child: GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => OtherProfileView(
+                  username:     post.username,
+                  profileImage: post.profileImage,
+                ),
+              ),
             ),
-
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(
+                  post.username,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize:   15,
+                  ),
+                ),
+                Text(
+                  post.subtitle,
+                  style: TextStyle(
+                    color:    Colors.grey.shade600,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
 
-                GestureDetector(
+        // More
+        IconButton(
+          onPressed: () {},
+          icon: const Icon(Icons.more_horiz, size: 22),
+        ),
+      ],
+    );
+  }
+}
 
-                  onTap: () {
+// ─────────────────────────────────────────────────────────────────────────────
 
-                    setState(() {
-                      isLiked = !isLiked;
-                    });
-                  },
+class _PostImageSlider extends StatefulWidget {
+  final List<String> images;
+  final VoidCallback onLike;
 
-                  child: AnimatedScale(
+  const _PostImageSlider({required this.images, required this.onLike});
 
-                    duration:
-                    const Duration(milliseconds: 200),
+  @override
+  State<_PostImageSlider> createState() => _PostImageSliderState();
+}
 
-                    scale: isLiked ? 1.15 : 1,
+class _PostImageSliderState extends State<_PostImageSlider> {
+  final PageController _pageController = PageController();
+  int  _currentPage = 0;
+  bool _showHeart   = false;
 
-                    child: Icon(
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
-                      isLiked
+  void _onDoubleTap() {
+    widget.onLike();
+    setState(() => _showHeart = true);
+    Future.delayed(const Duration(milliseconds: 700), () {
+      if (mounted) setState(() => _showHeart = false);
+    });
+  }
 
-                          ? Icons.favorite
-
-                          : Icons.favorite_outline,
-
-                      size: 26,
-
-                      color:
-                      isLiked
-
-                          ? Colors.red
-
-                          : Colors.black,
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(26),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Page view
+          SizedBox(
+            height: 320,
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount:  widget.images.length,
+              onPageChanged: (i) => setState(() => _currentPage = i),
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onDoubleTap: _onDoubleTap,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ImageViewerScreen(
+                        images:       widget.images,
+                        initialIndex: index,
+                      ),
                     ),
                   ),
-                ),
-
-                const SizedBox(width: 20),
-
-                _minimalIcon(
-                  Icons.chat_bubble_outline_rounded,
-                ),
-
-                const SizedBox(width: 20),
-
-                _minimalIcon(
-                  Icons.reply_rounded,
-                ),
-
-                const Spacer(),
-
-                _minimalIcon(
-                  Icons.bookmark_outline,
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 12),
-
-          /// LIKES
-          const Text(
-            "1,284 likes",
-
-            style: TextStyle(
-              fontWeight:
-              FontWeight.bold,
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          /// CAPTION
-          RichText(
-            text: TextSpan(
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 14,
-                height: 1.7,
-              ),
-
-              children: [
-
-                TextSpan(
-                  text:
-                  "${widget.username} ",
-
-                  style:
-                  const TextStyle(
-                    fontWeight:
-                    FontWeight
-                        .bold,
+                  child: Container(
+                    color: Colors.black,
+                    child: Center(
+                      child: Image.asset(
+                        widget.images[index],
+                        fit:   BoxFit.contain,
+                        width: double.infinity,
+                      ),
+                    ),
                   ),
+                );
+              },
+            ),
+          ),
+
+          // Image count badge (top-right)
+          if (widget.images.length > 1)
+            Positioned(
+              top:   12,
+              right: 12,
+              child: _CountBadge(
+                current: _currentPage + 1,
+                total:   widget.images.length,
+              ),
+            ),
+
+          // Dot indicators (bottom)
+          if (widget.images.length > 1)
+            Positioned(
+              bottom: 14,
+              child: _DotIndicator(
+                count:   widget.images.length,
+                current: _currentPage,
+              ),
+            ),
+
+          // Heart burst on double-tap
+          IgnorePointer(
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 250),
+              opacity:  _showHeart ? 1 : 0,
+              child: AnimatedScale(
+                duration: const Duration(milliseconds: 250),
+                scale:    _showHeart ? 1 : 0.6,
+                child: const Icon(
+                  Icons.favorite,
+                  color: Colors.white,
+                  size:  110,
                 ),
-
-                TextSpan(
-                  text: widget.caption,
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 10),
-
-          /// COMMENTS
-          Text(
-            "view all 3 comments",
-
-            style: TextStyle(
-              color:
-              Colors.grey.shade700,
-            ),
-          ),
-
-          const SizedBox(height: 6),
-
-          Text(
-            "2H AGO",
-
-            style: TextStyle(
-              color:
-              Colors.grey.shade500,
-
-              fontSize: 11,
-
-              letterSpacing: 1,
-            ),
-          ),
-
-          const SizedBox(height: 18),
-
-          const SizedBox(height: 18),
-
-          Container(
-            margin:
-            const EdgeInsets.only(
-              top: 4,
-            ),
-
-            width: double.infinity,
-            height: 1.2,
-
-            color: const Color(
-              0xFFE5E5E5,
+              ),
             ),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _minimalIcon(
-      IconData icon,
-      ) {
+// ─────────────────────────────────────────────────────────────────────────────
 
+class _PostActions extends StatelessWidget {
+  final bool         isLiked;
+  final bool         isReposted;
+  final VoidCallback onToggleLike;
+  final VoidCallback onComment;
+  final VoidCallback onRepost;
+  final VoidCallback onShare;
+
+  const _PostActions({
+    required this.isLiked,
+    required this.isReposted,
+    required this.onToggleLike,
+    required this.onComment,
+    required this.onRepost,
+    required this.onShare,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: Row(
+        children: [
+          // Like
+          GestureDetector(
+            onTap: onToggleLike,
+            child: AnimatedScale(
+              duration: const Duration(milliseconds: 200),
+              scale:    isLiked ? 1.15 : 1,
+              child: Icon(
+                isLiked ? Icons.favorite : Icons.favorite_outline,
+                size:  26,
+                color: isLiked ? AppColors.like : Colors.black,
+              ),
+            ),
+          ),
+          const SizedBox(width: 20),
+
+          // Comment
+          GestureDetector(
+            onTap: onComment,
+            child: _ActionIcon(Icons.chat_bubble_outline_rounded),
+          ),
+          const SizedBox(width: 20),
+
+          // Repost
+          GestureDetector(
+            onTap: onRepost,
+            child: AnimatedScale(
+              duration: const Duration(milliseconds: 180),
+              scale: isReposted ? 1.15 : 1.0,
+              child: Icon(
+                Icons.repeat_rounded,
+                size:  26,
+                color: isReposted ? const Color(0xFF00BA7C) : Colors.black,
+              ),
+            ),
+          ),
+          const SizedBox(width: 20),
+
+          // Share
+          GestureDetector(
+            onTap: onShare,
+            child: _ActionIcon(Icons.reply_rounded),
+          ),
+
+          const Spacer(),
+
+          // Bookmark
+          _ActionIcon(Icons.bookmark_outline),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _PostCaption extends StatelessWidget {
+  final PostModel    post;
+  final bool         isLiked;
+  final VoidCallback onViewComments;
+
+  const _PostCaption({
+    required this.post,
+    required this.isLiked,
+    required this.onViewComments,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final likes = isLiked ? post.likeCount + 1 : post.likeCount;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '$likes likes',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        RichText(
+          text: TextSpan(
+            style: const TextStyle(color: Colors.black, fontSize: 14, height: 1.7),
+            children: [
+              TextSpan(
+                text:  '${post.username} ',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              TextSpan(text: post.caption),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        GestureDetector(
+          onTap: onViewComments,
+          child: Text(
+            'View all ${post.commentCount} comments',
+            style: TextStyle(color: Colors.grey.shade600),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          post.timeAgo,
+          style: TextStyle(
+            color:         Colors.grey.shade500,
+            fontSize:      11,
+            letterSpacing: 1,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _PostDivider extends StatelessWidget {
+  const _PostDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin:  const EdgeInsets.only(top: 4),
+      height:  1.2,
+      color:   AppColors.divider,
+    );
+  }
+}
+
+// ─── Micro widgets (used only within this file) ───────────────────────────────
+
+class _CountBadge extends StatelessWidget {
+  final int current;
+  final int total;
+  const _CountBadge({required this.current, required this.total});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color:        Colors.black38,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        '$current / $total',
+        style: const TextStyle(
+          color:      Colors.white,
+          fontSize:   11,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+class _DotIndicator extends StatelessWidget {
+  final int current;
+  final int count;
+  const _DotIndicator({required this.current, required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(count, (i) {
+        final active = i == current;
+        return AnimatedContainer(
+          duration:  const Duration(milliseconds: 200),
+          margin:    const EdgeInsets.symmetric(horizontal: 3),
+          width:     active ? 18 : 5,
+          height:    5,
+          decoration: BoxDecoration(
+            color:        active ? Colors.white : Colors.white54,
+            borderRadius: BorderRadius.circular(20),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class _ActionIcon extends StatelessWidget {
+  final IconData icon;
+  const _ActionIcon(this.icon);
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(4),
-
-      child: Icon(
-        icon,
-
-        size: 25,
-
-        color: Colors.black,
-
-        weight: 300,
-      ),
+      child: Icon(icon, size: 25, color: Colors.black),
     );
   }
 }

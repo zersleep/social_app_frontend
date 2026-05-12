@@ -1,3 +1,4 @@
 abstract class AppRoutes {
-  static const EDIT_PROFILE = '/edit-profile';
+  static const editProfile = '/edit-profile';
+  static const chatView    = '/chat-view';
 }

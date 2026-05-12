@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../shared/widgets/animated_nav_bar.dart';
 import '../../chat/screens/chat_screen.dart';
-import '../../placeholder/profile_screen.dart';
+import '../../profile/profile_view.dart';
 import '../../placeholder/search_screen.dart';
 import '../../reels/screens/reels_screen.dart';
 import 'home_screen.dart';
@@ -25,7 +25,7 @@ class _MainNavigationScreenState
     ReelsScreen(),
     SearchScreen(),
     ChatScreen(),
-    ProfileScreen(),
+    ProfileView(),
   ];
 
   static const List<NavItem> _navItems = [

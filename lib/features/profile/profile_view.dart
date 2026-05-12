@@ -112,7 +112,7 @@ class ProfileView extends GetView<ProfileController> {
                             Expanded(
                               child: _ProfileButton(
                                 label: 'Edit Profile',
-                                onPressed: () => Get.toNamed(AppRoutes.EDIT_PROFILE),
+                                onPressed: () => Get.toNamed(AppRoutes.editProfile),
                               ),
                             ),
                             const SizedBox(width: 8),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../screens/new_message_screen.dart';
+
 class ChatAppBar extends StatelessWidget {
   final String avatar;
 
@@ -23,29 +25,24 @@ class ChatAppBar extends StatelessWidget {
             child: Text(
               'Chats',
               style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w800,
-                color: Colors.black,
+                fontSize:      28,
+                fontWeight:    FontWeight.w800,
+                color:         Colors.black,
                 letterSpacing: -0.5,
               ),
             ),
           ),
           IconButton(
             onPressed: () {},
-            icon: const Icon(
-              Icons.photo_camera_outlined,
-              color: Colors.black,
-              size: 26,
-            ),
+            icon: const Icon(Icons.photo_camera_outlined, color: Colors.black, size: 26),
             splashRadius: 22,
           ),
           IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.edit_square,
-              color: Colors.black,
-              size: 24,
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const NewMessageScreen()),
             ),
+            icon: const Icon(Icons.edit_square, color: Colors.black, size: 24),
             splashRadius: 22,
           ),
         ],

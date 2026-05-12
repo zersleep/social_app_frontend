@@ -2,11 +2,12 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../profile/other_profile_view.dart';
 import '../story_model.dart';
 import '../story_user_model.dart';
-import 'package:flutter/services.dart';
 
 class StoryViewerScreen extends StatefulWidget {
 
@@ -725,36 +726,16 @@ class _StoryViewerScreenState
                   GestureDetector(
 
                     onTap: () {
-
-                      ScaffoldMessenger.of(context)
-                          .showSnackBar(
-
-                        SnackBar(
-
-                          behavior:
-                          SnackBarBehavior.floating,
-
-                          backgroundColor:
-                          Colors.black87,
-
-                          shape:
-                          RoundedRectangleBorder(
-                            borderRadius:
-                            BorderRadius.circular(16),
+                      _pauseStory();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => OtherProfileView(
+                            username: user.username,
+                            profileImage: user.profileImage,
                           ),
-
-                          content: Text(
-                            "Open ${user.username}'s profile",
-
-                            style: const TextStyle(
-                              color: Colors.white,
-                            ),
-                          ),
-
-                          duration:
-                          const Duration(seconds: 1),
                         ),
-                      );
+                      ).then((_) => _resumeStory());
                     },
 
                     child: Row(
