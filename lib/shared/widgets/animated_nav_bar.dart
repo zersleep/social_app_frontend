@@ -34,6 +34,8 @@ class _AnimatedNavBarState extends State<AnimatedNavBar>
 
   bool _isDragging = false;
   int _hoverIndex = -1;
+  List<Rect> _itemRectSnapshot = const [];
+  Rect? _rowRectSnapshot;
   late AnimationController _scaleController;
   late Animation<double> _scaleAnim;
 
@@ -67,33 +69,53 @@ class _AnimatedNavBarState extends State<AnimatedNavBar>
     super.dispose();
   }
 
-  int _indexAt(Offset globalPos) {
-    for (int i = 0; i < _itemKeys.length; i++) {
-      final ctx = _itemKeys[i].currentContext;
-      if (ctx == null) continue;
-      final box = ctx.findRenderObject() as RenderBox?;
-      if (box == null) continue;
+  void _captureSnapshot() {
+    final rects = <Rect>[];
+    for (final key in _itemKeys) {
+      final ctx = key.currentContext;
+      final box = ctx?.findRenderObject() as RenderBox?;
+      if (ctx == null || box == null || !box.hasSize) {
+        rects.add(Rect.zero);
+        continue;
+      }
       final topLeft = box.localToGlobal(Offset.zero);
-      final rect = topLeft & box.size;
-      final expanded = Rect.fromLTRB(
-        rect.left,
-        rect.top - 40,
-        rect.right,
-        rect.bottom + 40,
-      );
-      if (expanded.contains(globalPos)) return i;
+      rects.add(topLeft & box.size);
     }
+    _itemRectSnapshot = rects;
     final rowBox = _rowKey.currentContext?.findRenderObject() as RenderBox?;
-    if (rowBox != null) {
-      final rowTopLeft = rowBox.localToGlobal(Offset.zero);
-      final rowRect = rowTopLeft & rowBox.size;
-      if (globalPos.dx <= rowRect.left) return 0;
-      if (globalPos.dx >= rowRect.right) return _itemKeys.length - 1;
+    if (rowBox != null && rowBox.hasSize) {
+      _rowRectSnapshot = rowBox.localToGlobal(Offset.zero) & rowBox.size;
+    } else {
+      _rowRectSnapshot = null;
     }
-    return _hoverIndex;
+  }
+
+  int _indexAt(Offset globalPos) {
+    if (_itemRectSnapshot.isEmpty) return -1;
+    // Snap to row edges so dragging past the ends still selects the end item.
+    final row = _rowRectSnapshot;
+    if (row != null) {
+      if (globalPos.dx <= row.left) return 0;
+      if (globalPos.dx >= row.right) return _itemRectSnapshot.length - 1;
+    }
+    // Pick the item whose horizontal center is nearest to the pointer.
+    // This is stable even if items resize underneath the finger.
+    int best = _hoverIndex >= 0 ? _hoverIndex : 0;
+    double bestDist = double.infinity;
+    for (int i = 0; i < _itemRectSnapshot.length; i++) {
+      final r = _itemRectSnapshot[i];
+      if (r.width == 0) continue;
+      final d = (globalPos.dx - r.center.dx).abs();
+      if (d < bestDist) {
+        bestDist = d;
+        best = i;
+      }
+    }
+    return best;
   }
 
   void _handleStart(Offset globalPos) {
+    _captureSnapshot();
     final idx = _indexAt(globalPos);
     if (idx < 0) return;
     setState(() {
@@ -123,6 +145,8 @@ class _AnimatedNavBarState extends State<AnimatedNavBar>
       _hoverIndex = -1;
     });
     _scaleController.reverse();
+    _itemRectSnapshot = const [];
+    _rowRectSnapshot = null;
   }
 
   @override
