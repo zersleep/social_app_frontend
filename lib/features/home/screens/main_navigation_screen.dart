@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../placeholder/chat_screen.dart';
+import '../../../shared/widgets/animated_nav_bar.dart';
+import '../../chat/screens/chat_screen.dart';
 import '../../placeholder/profile_screen.dart';
 import '../../placeholder/search_screen.dart';
 import '../../reels/screens/reels_screen.dart';
@@ -19,22 +20,20 @@ class _MainNavigationScreenState
 
   int currentIndex = 0;
 
-  final List<Widget> pages = [
+  final List<Widget> pages = const [
+    HomeScreen(),
+    ReelsScreen(),
+    SearchScreen(),
+    ChatScreen(),
+    ProfileScreen(),
+  ];
 
-    /// HOME
-    const HomeScreen(),
-
-    /// REELS
-    const ReelsScreen(),
-
-    /// SEARCH
-    const SearchScreen(),
-
-    /// CHAT
-    const ChatScreen(),
-
-    /// PROFILE
-    const ProfileScreen(),
+  static const List<NavItem> _navItems = [
+    NavItem(icon: Icons.home_rounded, label: 'Home'),
+    NavItem(icon: Icons.movie_rounded, label: 'Reels'),
+    NavItem(icon: Icons.search_rounded, label: 'Search'),
+    NavItem(icon: Icons.chat_bubble_rounded, label: 'Chats'),
+    NavItem(icon: Icons.person_rounded, label: 'Profile'),
   ];
 
   @override
@@ -43,7 +42,7 @@ class _MainNavigationScreenState
     final bool isReelsPage = currentIndex == 1;
 
     return Scaffold(
-
+      extendBody: true,
       backgroundColor:
       isReelsPage
           ? Colors.black
@@ -51,70 +50,14 @@ class _MainNavigationScreenState
 
       body: pages[currentIndex],
 
-      bottomNavigationBar: BottomNavigationBar(
-
-        currentIndex: currentIndex,
-
-        onTap: (index) {
+      bottomNavigationBar: AnimatedNavBar(
+        items: _navItems,
+        selectedIndex: currentIndex,
+        onChanged: (index) {
           setState(() {
             currentIndex = index;
           });
         },
-
-        type: BottomNavigationBarType.fixed,
-
-        elevation: 0,
-
-        backgroundColor:
-        isReelsPage
-            ? Colors.black
-            : Colors.white,
-
-        selectedItemColor:
-        isReelsPage
-            ? Colors.white
-            : Colors.black,
-
-        unselectedItemColor:
-        isReelsPage
-            ? Colors.white70
-            : Colors.black54,
-
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-
-        items: const [
-
-          /// HOME
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_filled),
-            label: '',
-          ),
-
-          /// REELS
-          BottomNavigationBarItem(
-            icon: Icon(Icons.video_library_outlined),
-            label: '',
-          ),
-
-          /// SEARCH
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: '',
-          ),
-
-          /// CHAT
-          BottomNavigationBarItem(
-            icon: Icon(Icons.send_outlined),
-            label: '',
-          ),
-
-          /// PROFILE
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: '',
-          ),
-        ],
       ),
     );
   }
