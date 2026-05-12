@@ -4,8 +4,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
-import '../models/story_model.dart';
-import '../models/story_user_model.dart';
+import '../story_model.dart';
+import '../story_user_model.dart';
 import 'package:flutter/services.dart';
 
 class StoryViewerScreen extends StatefulWidget {

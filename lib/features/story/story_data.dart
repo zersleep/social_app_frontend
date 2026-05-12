@@ -1,5 +1,5 @@
-import 'models/story_model.dart';
-import 'models/story_user_model.dart';
+import 'story_model.dart';
+import 'story_user_model.dart';
 
 final List<StoryUserModel> storyUsers = [
 

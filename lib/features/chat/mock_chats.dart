@@ -1,4 +1,4 @@
-import '../models/chat_models.dart';
+import 'chat_models.dart';
 
 const List<ChatStory> mockStories = [
   ChatStory(
