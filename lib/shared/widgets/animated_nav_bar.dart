@@ -23,8 +23,7 @@ class AnimatedNavBar extends StatefulWidget {
   State<AnimatedNavBar> createState() => _AnimatedNavBarState();
 }
 
-class _AnimatedNavBarState extends State<AnimatedNavBar>
-    with SingleTickerProviderStateMixin {
+class _AnimatedNavBarState extends State<AnimatedNavBar> {
   static const Color _accent = Color(0xFF5B4BFF);
   static const Color _pillBg = Color(0xFFEAE6FF);
   static const Color _inactive = Color(0xFF1A1A1A);
@@ -36,21 +35,11 @@ class _AnimatedNavBarState extends State<AnimatedNavBar>
   int _hoverIndex = -1;
   List<Rect> _itemRectSnapshot = const [];
   Rect? _rowRectSnapshot;
-  late AnimationController _scaleController;
-  late Animation<double> _scaleAnim;
 
   @override
   void initState() {
     super.initState();
     _itemKeys.addAll(List.generate(widget.items.length, (_) => GlobalKey()));
-    _scaleController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 220),
-    );
-    _scaleAnim = CurvedAnimation(
-      parent: _scaleController,
-      curve: Curves.easeOutCubic,
-    );
   }
 
   @override
@@ -61,12 +50,6 @@ class _AnimatedNavBarState extends State<AnimatedNavBar>
         ..clear()
         ..addAll(List.generate(widget.items.length, (_) => GlobalKey()));
     }
-  }
-
-  @override
-  void dispose() {
-    _scaleController.dispose();
-    super.dispose();
   }
 
   void _captureSnapshot() {
@@ -122,7 +105,6 @@ class _AnimatedNavBarState extends State<AnimatedNavBar>
       _isDragging = true;
       _hoverIndex = idx;
     });
-    _scaleController.forward();
     HapticFeedback.selectionClick();
     if (idx != widget.selectedIndex) {
       widget.onChanged(idx);
@@ -144,68 +126,44 @@ class _AnimatedNavBarState extends State<AnimatedNavBar>
       _isDragging = false;
       _hoverIndex = -1;
     });
-    _scaleController.reverse();
     _itemRectSnapshot = const [];
     _rowRectSnapshot = null;
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-        child: Center(
-          child: Listener(
-            onPointerDown: (e) => _handleStart(e.position),
-            onPointerMove: (e) => _handleUpdate(e.position),
-            onPointerUp: (_) => _handleEnd(),
-            onPointerCancel: (_) => _handleEnd(),
-            child: AnimatedBuilder(
-              animation: _scaleAnim,
-              builder: (context, child) {
-                final scale = 1.0 + (_scaleAnim.value * 0.02);
-                return Transform.scale(
-                  scale: scale,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(28),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(
-                            0.06 + _scaleAnim.value * 0.08,
-                          ),
-                          blurRadius: 20 + _scaleAnim.value * 14,
-                          offset: Offset(0, 6 + _scaleAnim.value * 4),
-                        ),
-                      ],
-                    ),
-                    child: child,
-                  ),
-                );
-              },
+    return Listener(
+      onPointerDown: (e) => _handleStart(e.position),
+      onPointerMove: (e) => _handleUpdate(e.position),
+      onPointerUp: (_) => _handleEnd(),
+      onPointerCancel: (_) => _handleEnd(),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            top: BorderSide(color: Color(0xFFE5E5E5), width: 0.5),
+          ),
+        ),
+        child: SafeArea(
+          top: false,
+          child: SizedBox(
+            height: 65,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Row(
                 key: _rowKey,
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  for (int index = 0; index < widget.items.length; index++) ...[
-                    if (index > 0) const SizedBox(width: 4),
+                  for (int index = 0; index < widget.items.length; index++)
                     _NavBarItem(
                       key: _itemKeys[index],
                       item: widget.items[index],
                       isSelected: index == widget.selectedIndex,
-                      isHovered:
-                          _isDragging && index == _hoverIndex,
+                      isHovered: _isDragging && index == _hoverIndex,
                       accent: _accent,
                       pillBg: _pillBg,
                       inactive: _inactive,
                     ),
-                  ],
                 ],
               ),
             ),
@@ -293,7 +251,7 @@ class _NavBarItem extends StatelessWidget {
               child: isSelected
                   ? Padding(
                       key: ValueKey(item.label),
-                      padding: const EdgeInsets.only(left: 8),
+                      padding: const EdgeInsets.only(left: 8, top: 14),
                       child: Text(
                         item.label,
                         style: TextStyle(
@@ -310,4 +268,4 @@ class _NavBarItem extends StatelessWidget {
       ),
     );
   }
-}
+} 
